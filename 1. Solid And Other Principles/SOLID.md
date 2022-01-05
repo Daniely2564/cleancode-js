@@ -491,3 +491,80 @@ const gallery = new GalleryComponent([
 Via this interface, we can define one or more images, set their dimensions, and define captions for each image. It fulfills all of the requirements wihtout inviting new complexities or leaking complexities from underlying implementation.
 
 ## Functional programming principles
+
+It is easy to observe and discuss the difference between OOP and functional programming by exploring an example.
+
+### Class
+
+### Example : A mechanism to fetch paginated data from server
+
+To Achive this, we might create a `PaginatedDataFetcher` class.
+
+```js
+class PaginatedDataFetcher {
+  constructor(endpoint, startingPage) {
+    this.endpoint = endpoint;
+    this.nextPage = startingPage || 1;
+  }
+
+  getNextPage() {
+    const response = fetch(`/api/${this.endpoint}/${this.nextPage}`);
+    this.nextPage++;
+    return fetched;
+  }
+}
+```
+
+and the following is an example of how you would use the `PaginatedDataFetcher` class:
+
+```js
+const pageFetcher = new PaginatedDataFetcher("account_data", 30);
+
+await pageFetcher.getNextPage(); // Fetches /api/account_data/30
+await pageFetcher.getNextPage(); // Fetches /api/account_data/31
+await pageFetcher.getNextPage(); // Fetches /api/account_data/32
+```
+
+The `getNextPage` method relies on the remembered state of its objects, `endpoint` and `nextPage`, in order to know which URL to request next.
+
+### Term : State
+
+A **state** can be thought of as the underlying remembered data of any program or piece of code that its results or effects are derived from.
+
+For a car, it could be its feul, current upkeep, and oil levels, and so on.
+
+### Functional Programming
+
+As distinct from OOP, is purely interested in the usage of functions and immutable state to achieve its goals.
+
+We can achieve the same behavior of `getPage` as follows.
+
+#### Example : Get Page
+
+```js
+const getPage = async (endpoint, pageNumber = 1) => ({
+  endpoint,
+  pageNumber,
+  response: await fetch(`/api/${endpoint}/${pageNumber}`),
+  next: () => getPage(endPoint, pageNumber + 1),
+});
+```
+
+When called, the `getPage` function will return an object containing the response from the server, as well as the `endpoint` and `pageNumber` used.
+
+```js
+const page1 = await getPage("account_data");
+const page2 = await page1.next();
+const page3 = await page2.next();
+```
+
+Using this pattern, we only need a reference to the last retrieved page in order to make the next request.
+
+Our `getPage` function does not mutate any data. It only uses the passed data to derive new data, and therefore, it employs immutability. Functional puritty and immutability are among the most vital functional concepts to understand, and, usefully, are the principles that are applicable to all paradigms of programming.
+
+## Functional purity.
+
+Function can be pure when their return value is only derived from their input values (also called \_\_idempotence), and when there are no side-effects.
+
+- Predictability
+- Testability
